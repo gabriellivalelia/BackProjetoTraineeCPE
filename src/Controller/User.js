@@ -45,6 +45,15 @@ export async function getUserById(req,res){
     }); 
 }
 
+export async function getUserByEmail(req,res){
+    let email = req.body.email;
+    return openDB()
+    .then(db=>{
+        return db.all('SELECT* FROM User WHERE email=?', [email])
+        .then(user=>res.json(user))
+    }); 
+}
+
 export async function deleteUser(req,res){
     let id = req.body.id;
     openDB()
