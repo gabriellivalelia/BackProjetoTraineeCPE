@@ -1,6 +1,7 @@
 import { openDB } from "./configDB.js";
 import { createTableProduct } from "./Controller/Product.js";
 import { createTableUser } from "./Controller/User.js";
+import { createTableFavoriteProduct } from "./Controller/FavoriteProduct.js";
 
 
 
@@ -10,6 +11,7 @@ app.use(express.json());
 
 createTableProduct();
 createTableUser();
+createTableFavoriteProduct();
 
 import router from "./routes.js";
 
