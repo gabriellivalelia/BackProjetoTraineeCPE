@@ -2,10 +2,9 @@ import { openDB } from "./configDB.js";
 import { createTableProduct } from "./Controller/Product.js";
 import { createTableUser } from "./Controller/User.js";
 import { createTableFavoriteProduct } from "./Controller/FavoriteProduct.js";
-
-
-
 import express from "express";
+
+
 const app = express();
 app.use(express.json());
 
