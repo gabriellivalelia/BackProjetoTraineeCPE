@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { createUser, updateUser, getUsers, getUserById, deleteUser} from "./Controller/User.js"
 import { createProduct, updateProduct, getProducts, getProductById , deleteProduct} from "./Controller/Product.js";
-import { createFavoriteProduct, updateFavoriteProduct, getFavoriteProducts, getFavoriteProductById, getProductIdsOfFavoriteProductsByUserId, deleteFavortiteProduct } from "./Controller/FavoriteProduct.js";
+import { createFavoriteProduct, updateFavoriteProduct, getFavoriteProducts, getFavoriteProductById, getProductIdsOfFavoriteProductsByUserId, getIdFavoriteProductByProductIdAndUserId , deleteFavortiteProduct } from "./Controller/FavoriteProduct.js";
 
 const router = Router();
 
@@ -34,6 +34,7 @@ router.delete('/deleteProduct', deleteProduct);
 router.get('/getFavoriteProducts', getFavoriteProducts);
 router.get('/getFavoriteProductById', getFavoriteProductById);
 router.get('/getProductIdsOfFavoriteProductsByUserId', getProductIdsOfFavoriteProductsByUserId);
+router.get('/getIdFavoriteProductByProductIdAndUserId', getIdFavoriteProductByProductIdAndUserId);
 
 router.post('/createFavoriteProduct', createFavoriteProduct);
 

@@ -49,6 +49,20 @@ export async function getFavoriteProductById(req,res){
     }); 
 }
 
+export async function getIdFavoriteProductByProductIdAndUserId(req,res){
+    let productId = req.body.productId;
+    let userId = req.body.userId;
+
+    return openDB()
+    .then(db=>{
+        return db.all('SELECT* FROM FavoriteProduct WHERE productId=? AND userId=?', [productId, userId])
+        .then(rows=> {
+            const favoriteProductId = rows.map(row => row.id);
+            res.json(favoriteProductId);
+        })
+    }); 
+}
+
 export async function getProductIdsOfFavoriteProductsByUserId(req,res){
     let userId = req.body.userId;
     return openDB()
