@@ -54,14 +54,13 @@ router.post(
       body('name').notEmpty().withMessage('Nome de usuário é obrigatório.'),
       body('email').isEmail().withMessage('Digite um email válido.').custom(async (value) => {
         const user = await getUserByEmail(value);
-        if (user && user.id.toString() !== body('id')) {
-            throw new Error('Este email já está cadastrado.');
-          }
-          return true;
-      }),
+
+        if (!!user) throw new Error("E-mail já cadastrado. Por favor, insira um novo");
+        return true;
+      }), 
       body('phone').notEmpty().withMessage('Telefone é obrigatório.'),
       body('address').notEmpty().withMessage('Endereço é obrigatório.'),
-      body('password').notEmpty().withMessage('A senha é obrigatória').isLength({ min: 6 }).withMessage('A senha deve ter pelo menos 6 caracteres.'),
+      body('password').notEmpty().withMessage('A senha é obrigatória').isLength({ min: 6 }).withMessage('A senha deve ter pelo menos 6 caracteres.'), 
 
     ],
     (req, res) => {
