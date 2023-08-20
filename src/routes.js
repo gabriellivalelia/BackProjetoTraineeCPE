@@ -55,7 +55,7 @@ router.post(
       body('email').isEmail().withMessage('Digite um email válido.').custom(async (value) => {
         const user = await getUserByEmail(value);
 
-        if (!!user) throw new Error("E-mail já cadastrado. Por favor, insira um novo");
+        if (!!user) throw new Error("E-mail já cadastrado. Por favor, insira um novo.");
         return true;
       }), 
       body('phone').notEmpty().withMessage('Telefone é obrigatório.'),
@@ -78,13 +78,14 @@ router.put(
     '/updateUser',
     [
         body('name').optional().notEmpty().withMessage('Nome de usuário não pode ser nulo.'),
-        body('email').optional().isEmail().withMessage('Digite um email válido.').custom(async (email) => {
-            const user = await getUserByEmail(email);
-            if (user && user.id.toString() !== body('id')) {
-                throw new Error('Este email já está cadastrado.');
-              }
-              return true;
-          }),
+        body('email').optional().isEmail().withMessage('Digite um email válido.').custom(async (value) => {
+            const user = await getUserByEmail(value);
+    
+            if (!!user && user.id.toString() !== body('id')){
+             throw new Error("E-mail já cadastrado. Por favor, insira um novo.");
+            }
+            return true;
+        }), 
         body('phone').optional().notEmpty().withMessage('Telefone não poder ser nulo.'),
         body('address').optional().notEmpty().withMessage('Endereço não pode ser nulo.'),
         body('password').optional().notEmpty().withMessage('A senha é obrigatória').isLength({ min: 6 }).withMessage('A senha deve ter pelo menos 6 caracteres.'),
@@ -92,6 +93,8 @@ router.put(
       ],
       (req, res) => {
         const errors = validationResult(req);
+        const a = req.body;
+        console.log({a});
     
         if (!errors.isEmpty()) {
           return res.status(400).json({ errors: errors.array() });
