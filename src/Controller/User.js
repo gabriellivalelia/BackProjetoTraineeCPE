@@ -4,17 +4,28 @@ import { v4 as uuidv4 } from "uuid";
 export async function createTableUser(req, res) {
   const db = await openDB();
 
-  db.exec(
+  await db.exec(
     "CREATE TABLE IF NOT EXISTS User ( id UUID PRIMARY KEY UNIQUE NOT NULL, name TEXT NOT NULL, email TEXT UNIQUE NOT NULL, phone TEXT NOT NULL, address TEXT NOT NULL, password TEXT NOT NULL )"
   );
 }
 
 export async function createUser(req, res) {
   const userData = req.body;
-  const uuid = uuidv4();
   const db = await openDB();
 
-  return db.run(
+  const [user] = await db.all("SELECT * FROM User WHERE email=?", [
+    userData.email,
+  ]);
+
+  if (!!user) {
+    return res
+      .status(409)
+      .json({ message: "E-mail já cadastrado. Por favor, insira um novo." });
+  }
+
+  const uuid = uuidv4();
+
+  await db.run(
     "INSERT INTO User ( id, name, email, phone, address, password) VALUES (?, ?, ?, ?, ?, ?)",
     [
       uuid,
@@ -25,6 +36,10 @@ export async function createUser(req, res) {
       userData.password,
     ]
   );
+
+  res.json({
+    statusCode: 200,
+  });
 }
 
 export async function updateUser(req, res) {
@@ -52,13 +67,19 @@ export async function updateUser(req, res) {
   updateParams.push(user.id); // Adiciona o ID do usuário aos parâmetros da consulta
 
   // Executa a consulta SQL de atualização com os parâmetros fornecidos
-  db.run(updateQuery, updateParams);
+  await db.run(updateQuery, updateParams);
+
+  res.json({
+    statusCode: 200,
+  });
 }
 
 export async function getUsers(req, res) {
   const db = await openDB();
 
-  return db.all("SELECT* FROM User");
+  return await db
+    .all("SELECT* FROM User")
+    .then((products) => res.json(products));
 }
 
 export async function getUserById(req, res) {
@@ -77,10 +98,35 @@ export async function getUserByEmail(email) {
 }
 
 export async function deleteUser(req, res) {
-  let id = req.body.id;
+  let id = req.params.id;
   const db = await openDB();
 
-  db.all("DELETE FROM User WHERE id=?", [id]);
+  await db.all("DELETE FROM User WHERE id=?", [id]);
+
+  res.json({
+    statusCode: 200,
+  });
+}
+
+export async function logIn(req, res) {
+  const db = await openDB();
+  let email = req.body.email;
+  let password = req.body.password;
+
+  const [user] = await db.all("SELECT * FROM User WHERE email=?", [email]);
+
+  if (!user) {
+    return res.status(401).json({ message: "E-mail não cadastrado." });
+  } else {
+    if (user.password === password) {
+      return res.status(200).json({
+        tokenAcess: user.id,
+        message: "Login bem-sucedido.",
+      });
+    } else {
+      return res.status(401).json({ message: "Senha incorreta." });
+    }
+  }
 }
 
 export async function deleteTable(req, res) {

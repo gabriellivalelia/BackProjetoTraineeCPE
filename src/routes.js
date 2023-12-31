@@ -7,6 +7,7 @@ import {
   getUserById,
   getUserByEmail,
   deleteUser,
+  logIn,
 } from "./Controller/User.js";
 import {
   createProduct,
@@ -22,7 +23,7 @@ import {
   getFavoriteProductById,
   getProductIdsOfFavoriteProductsByUserId,
   getIdFavoriteProductByProductIdAndUserId,
-  deleteFavortiteProduct,
+  deleteFavoriteProduct,
 } from "./Controller/FavoriteProduct.js";
 
 const router = Router();
@@ -78,16 +79,7 @@ router.post(
   "/createUser",
   [
     body("name").notEmpty().withMessage("Nome de usuário é obrigatório."),
-    body("email")
-      .isEmail()
-      .withMessage("Digite um email válido.")
-      .custom(async (value) => {
-        const user = await getUserByEmail(value);
-
-        if (!!user)
-          throw new Error("E-mail já cadastrado. Por favor, insira um novo.");
-        return true;
-      }),
+    body("email").isEmail().withMessage("Digite um email válido."),
     body("phone").notEmpty().withMessage("Telefone é obrigatório."),
     body("address").notEmpty().withMessage("Endereço é obrigatório."),
     body("password")
@@ -107,7 +99,7 @@ router.post(
       createUser(req, res);
     } catch (error) {
       console.error("Error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(500).json({ message: "Erro interno no servidor." });
     }
   }
 );
@@ -148,8 +140,6 @@ router.put(
   ],
   (req, res) => {
     const errors = validationResult(req);
-    const a = req.body;
-    console.log({ a });
 
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -165,8 +155,8 @@ router.put(
 );
 
 router.delete(
-  "/deleteUser",
-  [body("id").notEmpty().withMessage("Id de usuário é obrigatório.")],
+  "/deleteUser/:id",
+  [param("id").notEmpty().withMessage("Id de usuário é obrigatório.")],
   (req, res) => {
     const errors = validationResult(req);
 
@@ -183,6 +173,33 @@ router.delete(
   }
 );
 
+router.post(
+  "/logIn",
+  [
+    body("email").isEmail().withMessage("Digite um email válido."),
+    body("password")
+      .notEmpty()
+      .withMessage("A senha é obrigatória")
+      .isLength({ min: 6 })
+      .withMessage("A senha deve ter pelo menos 6 caracteres."),
+  ],
+
+  async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      logIn(req, res);
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ message: "Erro interno no servidor." });
+    }
+  }
+);
+
 //product
 router.get("/getProducts", getProducts);
 router.get(
@@ -195,7 +212,12 @@ router.get(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    getProductById(req, res);
+    try {
+      getProductById(req, res);
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
 );
 
@@ -213,7 +235,12 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    createProduct(req, res);
+    try {
+      createProduct(req, res);
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
 );
 
@@ -240,13 +267,18 @@ router.put(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    updateProduct(req, res);
+    try {
+      updateProduct(req, res);
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
 );
 
 router.delete(
-  "/deleteProduct",
-  [body("id").notEmpty().withMessage("Id de produto é obrigatório.")],
+  "/deleteProduct/:id",
+  [param("id").notEmpty().withMessage("Id de produto é obrigatório.")],
   (req, res) => {
     const errors = validationResult(req);
 
@@ -254,15 +286,20 @@ router.delete(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    deleteProduct(req, res);
+    try {
+      deleteProduct(req, res);
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
 );
 
 //favoriteProduct
 router.get("/getFavoriteProducts", getFavoriteProducts);
 router.get(
-  "/getFavoriteProductById",
-  [body("id").notEmpty().withMessage("A id é obrigatória.")],
+  "/getFavoriteProductById/:id",
+  [param("id").notEmpty().withMessage("A id é obrigatória.")],
 
   (req, res) => {
     const errors = validationResult(req);
@@ -271,12 +308,17 @@ router.get(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    getFavoriteProductById(req, res);
+    try {
+      getFavoriteProductById(req, res);
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
 );
 router.get(
-  "/getProductIdsOfFavoriteProductsByUserId",
-  [body("userId").notEmpty().withMessage("A id do usuário é obrigatória.")],
+  "/getProductIdsOfFavoriteProductsByUserId/:userId",
+  [param("userId").notEmpty().withMessage("A id do usuário é obrigatória.")],
 
   (req, res) => {
     const errors = validationResult(req);
@@ -285,14 +327,19 @@ router.get(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    getProductIdsOfFavoriteProductsByUserId(req, res);
+    try {
+      getProductIdsOfFavoriteProductsByUserId(req, res);
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
 );
 router.get(
-  "/getIdFavoriteProductByProductIdAndUserId",
+  "/getIdFavoriteProductByProductIdAndUserId/:productId/:userId",
   [
-    body("userId").notEmpty().withMessage("A id do usuário é obrigatória."),
-    body("productId").notEmpty().withMessage("A id do produto é obrigatória."),
+    param("userId").notEmpty().withMessage("A id do usuário é obrigatória."),
+    param("productId").notEmpty().withMessage("A id do produto é obrigatória."),
   ],
 
   (req, res) => {
@@ -302,7 +349,12 @@ router.get(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    getIdFavoriteProductByProductIdAndUserId(req, res);
+    try {
+      getIdFavoriteProductByProductIdAndUserId(req, res);
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
 );
 
@@ -320,7 +372,12 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    createFavoriteProduct(req, res);
+    try {
+      createFavoriteProduct(req, res);
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
 );
 
@@ -344,13 +401,18 @@ router.put(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    updateFavoriteProduct(req, res);
+    try {
+      updateFavoriteProduct(req, res);
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
 );
 
 router.delete(
-  "/deleteFavoriteProduct",
-  [body("id").notEmpty().withMessage("A id é obrigatória.")],
+  "/deleteFavoriteProduct/:id",
+  [param("id").notEmpty().withMessage("A id é obrigatória.")],
 
   (req, res) => {
     const errors = validationResult(req);
@@ -359,7 +421,7 @@ router.delete(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    deleteFavortiteProduct(req, res);
+    deleteFavoriteProduct(req, res);
   }
 );
 
