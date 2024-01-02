@@ -46,11 +46,10 @@ router.get(
     }
 
     try {
-      const user = await getUserById(req, res);
-      res.status(200).json(user);
+      await getUserById(req, res);
     } catch (error) {
       console.error("Error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(500).json({ error: "Erro interno no servidor" });
     }
   }
 );
@@ -66,11 +65,10 @@ router.get(
     }
 
     try {
-      const user = await getUserByEmail(req.body.email);
-      res.status(200).json(user);
+      await getUserByEmail(req.body.email);
     } catch (error) {
       console.error("Error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(500).json({ error: "Erro interno no servidor" });
     }
   }
 );
@@ -88,7 +86,7 @@ router.post(
       .isLength({ min: 6 })
       .withMessage("A senha deve ter pelo menos 6 caracteres."),
   ],
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -96,7 +94,7 @@ router.post(
     }
 
     try {
-      createUser(req, res);
+      await createUser(req, res);
     } catch (error) {
       console.error("Error:", error);
       res.status(500).json({ message: "Erro interno no servidor." });
@@ -111,18 +109,7 @@ router.put(
       .optional()
       .notEmpty()
       .withMessage("Nome de usuário não pode ser nulo."),
-    body("email")
-      .optional()
-      .isEmail()
-      .withMessage("Digite um email válido.")
-      .custom(async (value) => {
-        const user = await getUserByEmail(value);
-
-        if (!!user && user.id.toString() !== body("id")) {
-          throw new Error("E-mail já cadastrado. Por favor, insira um novo.");
-        }
-        return true;
-      }),
+    body("email").optional().isEmail().withMessage("Digite um email válido."),
     body("phone")
       .optional()
       .notEmpty()
@@ -138,7 +125,7 @@ router.put(
       .isLength({ min: 6 })
       .withMessage("A senha deve ter pelo menos 6 caracteres."),
   ],
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -146,10 +133,10 @@ router.put(
     }
 
     try {
-      updateUser(req, res);
+      await updateUser(req, res);
     } catch (error) {
       console.error("Error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(500).json({ error: "Erro interno no servidor" });
     }
   }
 );
@@ -157,7 +144,7 @@ router.put(
 router.delete(
   "/deleteUser/:id",
   [param("id").notEmpty().withMessage("Id de usuário é obrigatório.")],
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -165,10 +152,10 @@ router.delete(
     }
 
     try {
-      deleteUser(req, res);
+      await deleteUser(req, res);
     } catch (error) {
       console.error("Error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(500).json({ error: "Erro interno no servidor" });
     }
   }
 );
@@ -192,7 +179,7 @@ router.post(
     }
 
     try {
-      logIn(req, res);
+      await logIn(req, res);
     } catch (error) {
       console.error("Error:", error);
       res.status(500).json({ message: "Erro interno no servidor." });
@@ -205,7 +192,7 @@ router.get("/getProducts", getProducts);
 router.get(
   "/getProductById",
   [body("id").notEmpty().withMessage("Id de produto é obrigatório.")],
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -213,10 +200,10 @@ router.get(
     }
 
     try {
-      getProductById(req, res);
+      await getProductById(req, res);
     } catch (error) {
       console.error("Error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(500).json({ error: "Erro interno no servidor" });
     }
   }
 );
@@ -228,7 +215,7 @@ router.post(
     body("price").notEmpty().withMessage("Preço do produto é obrigatório."),
     body("image").notEmpty().withMessage("Imagem do produto é obrigatório."),
   ],
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -236,10 +223,10 @@ router.post(
     }
 
     try {
-      createProduct(req, res);
+      await createProduct(req, res);
     } catch (error) {
       console.error("Error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(500).json({ error: "Erro interno no servidor" });
     }
   }
 );
@@ -260,7 +247,7 @@ router.put(
       .notEmpty()
       .withMessage("Imagem do produto não pode ser nulo."),
   ],
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -268,10 +255,10 @@ router.put(
     }
 
     try {
-      updateProduct(req, res);
+      await updateProduct(req, res);
     } catch (error) {
       console.error("Error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(500).json({ error: "Erro interno no servidor" });
     }
   }
 );
@@ -279,7 +266,7 @@ router.put(
 router.delete(
   "/deleteProduct/:id",
   [param("id").notEmpty().withMessage("Id de produto é obrigatório.")],
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -287,10 +274,10 @@ router.delete(
     }
 
     try {
-      deleteProduct(req, res);
+      await deleteProduct(req, res);
     } catch (error) {
       console.error("Error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(500).json({ error: "Erro interno no servidor" });
     }
   }
 );
@@ -301,7 +288,7 @@ router.get(
   "/getFavoriteProductById/:id",
   [param("id").notEmpty().withMessage("A id é obrigatória.")],
 
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -309,10 +296,10 @@ router.get(
     }
 
     try {
-      getFavoriteProductById(req, res);
+      await getFavoriteProductById(req, res);
     } catch (error) {
       console.error("Error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(500).json({ error: "Erro interno no servidor" });
     }
   }
 );
@@ -320,7 +307,7 @@ router.get(
   "/getProductIdsOfFavoriteProductsByUserId/:userId",
   [param("userId").notEmpty().withMessage("A id do usuário é obrigatória.")],
 
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -328,10 +315,10 @@ router.get(
     }
 
     try {
-      getProductIdsOfFavoriteProductsByUserId(req, res);
+      await getProductIdsOfFavoriteProductsByUserId(req, res);
     } catch (error) {
       console.error("Error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(500).json({ error: "Erro interno no servidor" });
     }
   }
 );
@@ -342,7 +329,7 @@ router.get(
     param("productId").notEmpty().withMessage("A id do produto é obrigatória."),
   ],
 
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -350,10 +337,10 @@ router.get(
     }
 
     try {
-      getIdFavoriteProductByProductIdAndUserId(req, res);
+      await getIdFavoriteProductByProductIdAndUserId(req, res);
     } catch (error) {
       console.error("Error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(500).json({ error: "Erro interno no servidor" });
     }
   }
 );
@@ -365,7 +352,7 @@ router.post(
     body("productId").notEmpty().withMessage("A id do produto é obrigatória."),
   ],
 
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -373,10 +360,10 @@ router.post(
     }
 
     try {
-      createFavoriteProduct(req, res);
+      await createFavoriteProduct(req, res);
     } catch (error) {
       console.error("Error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(500).json({ error: "Erro interno no servidor" });
     }
   }
 );
@@ -394,7 +381,7 @@ router.put(
       .withMessage("A id do produto não pode ser nula."),
   ],
 
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -402,10 +389,10 @@ router.put(
     }
 
     try {
-      updateFavoriteProduct(req, res);
+      await updateFavoriteProduct(req, res);
     } catch (error) {
       console.error("Error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(500).json({ error: "Erro interno no servidor" });
     }
   }
 );
@@ -414,14 +401,19 @@ router.delete(
   "/deleteFavoriteProduct/:id",
   [param("id").notEmpty().withMessage("A id é obrigatória.")],
 
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    deleteFavoriteProduct(req, res);
+    try {
+      await await deleteFavoriteProduct(req, res);
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: "Erro interno no servidor" });
+    }
   }
 );
 
