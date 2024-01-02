@@ -12,7 +12,7 @@ export async function createTableUser(req, res) {
 export async function createUser(req, res) {
   const userData = req.body;
   const db = await openDB();
-
+  const uuid = uuidv4();
   const [user] = await db.all("SELECT * FROM User WHERE email=?", [
     userData.email,
   ]);
@@ -22,8 +22,6 @@ export async function createUser(req, res) {
       .status(409)
       .json({ message: "E-mail já cadastrado. Por favor, insira um novo." });
   }
-
-  const uuid = uuidv4();
 
   await db.run(
     "INSERT INTO User ( id, name, email, phone, address, password) VALUES (?, ?, ?, ?, ?, ?)",
@@ -46,6 +44,15 @@ export async function updateUser(req, res) {
   const user = req.body; // Recebe o objeto de usuário do corpo da solicitação
   const db = await openDB(); // Abre a conexão com o banco de dados
 
+  const [emailVerification] = await db.all("SELECT * FROM User WHERE email=?", [
+    userData.email,
+  ]);
+
+  if (!!emailVerification) {
+    return res
+      .status(409)
+      .json({ message: "E-mail já cadastrado. Por favor, insira um novo." });
+  }
   // Construir a consulta SQL apenas com os campos modificados
   let updateQuery = "UPDATE User SET ";
   const updateParams = [];
@@ -85,20 +92,20 @@ export async function getUsers(req, res) {
 export async function getUserById(req, res) {
   const db = await openDB();
   const id = req.params.id;
-
   const [user] = await db.all("SELECT* FROM User WHERE id=?", [id]);
-  return user;
+
+  return res.status(200).json(user);
 }
 
 export async function getUserByEmail(email) {
   const db = await openDB();
   const [user] = await db.all("SELECT * FROM User WHERE email=?", [email]);
 
-  return user;
+  return res.status(200).json(user);
 }
 
 export async function deleteUser(req, res) {
-  let id = req.params.id;
+  const id = req.params.id;
   const db = await openDB();
 
   await db.all("DELETE FROM User WHERE id=?", [id]);
@@ -110,9 +117,8 @@ export async function deleteUser(req, res) {
 
 export async function logIn(req, res) {
   const db = await openDB();
-  let email = req.body.email;
-  let password = req.body.password;
-
+  const email = req.body.email;
+  const password = req.body.password;
   const [user] = await db.all("SELECT * FROM User WHERE email=?", [email]);
 
   if (!user) {
@@ -132,5 +138,5 @@ export async function logIn(req, res) {
 export async function deleteTable(req, res) {
   const db = await openDB();
 
-  db.all("DROP TABLE IF EXISTS User");
+  await db.all("DROP TABLE IF EXISTS User");
 }
